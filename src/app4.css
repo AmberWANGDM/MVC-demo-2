@@ -1,0 +1,29 @@
+.app4 {}
+
+.circle {
+  width: 200px;
+  height: 200px;
+  margin: 50px auto;
+  background-color: #faad14;
+  border-radius: 50%;
+}
+
+.circle.active {
+  animation: changeColor 2s infinite alternate linear
+}
+
+@keyframes changeColor {
+  0% {
+    background-color: #faad14;
+
+  }
+
+  50% {
+    background-color: #ff7875;
+
+  }
+
+  100% {
+    background-color: #1677ff;
+  }
+}
