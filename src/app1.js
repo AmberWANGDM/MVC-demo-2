@@ -30,12 +30,12 @@ const v ={
     v.render()
   },
   // 渲染 & 更新页面
-  render(){
+  render(data){
     if(v.el.children.length !== 0){
       // 清空当前html,重新渲染
       v.el.empty()
     }
-    $(v.html.replace('{{n}}',m.data.n.toString())).appendTo(v.el)
+    $(v.html.replace('{{n}}',data)).appendTo(v.el)
   }
 }
 // ----------------- 其它 c -----------------
@@ -43,14 +43,7 @@ const c = {
   // 初始化, 形参为容器
   init(container){
     v.init(container)
-    c.ui={
-      // 需要的重要元素
-      button1 : $('.add'),
-      button2 : $('.sub'),
-      button3:  $('.mul'),
-      button4:  $('.div'),
-      number: $('#resultNum')
-    }
+    v.render(m.data.n)
     c.bindEvents()
   },
   // 绑定事件
@@ -58,19 +51,19 @@ const c = {
     // 绑定鼠标事件, 如果绑定在按钮上,更新页面后事件会失效,需要绑在container上
     v.el.on('click','.add', () => {
       m.data.n += 1
-      v.render()
+      v.render(m.data.n)
     })
     v.el.on('click','.sub', () => {
       m.data.n -= 1
-      v.render()
+      v.render(m.data.n)
     })
     v.el.on('click','.mul', () => {
       m.data.n *= 2
-      v.render()
+      v.render(m.data.n)
     })
     v.el.on('click','.div', () => {
       m.data.n /= 2
-      v.render()
+      v.render(m.data.n)
     })
   }
 }
