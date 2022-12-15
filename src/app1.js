@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import './app1.css'
+const eventBus = $(window) // api: on trigger
 
 // ----------------- 数据相关 m -----------------
 const m = {
@@ -7,7 +8,14 @@ const m = {
   data:{
     // 初始化数据
      n : parseInt(localStorage.getItem('res'))
-  }
+  },
+  create(){},
+  delete(){},
+  update(data){
+    Object.assign(m.data,data)
+    eventBus.trigger('m:update') // 触发事件
+  },
+  get(){}
 }
 
 // ----------------- 视图相关 v -----------------
@@ -45,6 +53,9 @@ const c = {
     v.init(container)
     v.render(m.data.n)
     c.autoBindEvents()
+    eventBus.on('m:update',()=>{ // 监听事件
+      v.render(m.data.n)
+    })
   },
   events:{
     'click .add':'add',
@@ -53,23 +64,18 @@ const c = {
     'click .div':'div'
   },
   add(){
-    m.data.n += 1
-    v.render(m.data.n)
+    m.update({n:m.data.n + 1})
   },
   sub(){
-    m.data.n -= 1
-    v.render(m.data.n)
+    m.update({n:m.data.n - 1})
   },
   mul(){
-    m.data.n *= 2
-    v.render(m.data.n)
+    m.update({n:m.data.n*2})
   },
   div(){
-    m.data.n /= 2
-    v.render(m.data.n)
+    m.update({n:m.data.n/2})
   }
   ,
-  //
   autoBindEvents(){
     for(let key in c.events){
       const event = key.split(' ')[0]
@@ -77,25 +83,7 @@ const c = {
       v.el.on(event,element,c[c.events[key]])
     }
   },
-  // bindEvents(){
-  //   // 绑定鼠标事件, 如果绑定在按钮上,更新页面后事件会失效,需要绑在container上
-  //   v.el.on('click','.add', () => {
-  //     m.data.n += 1
-  //     v.render(m.data.n)
-  //   })
-  //   v.el.on('click','.sub', () => {
-  //     m.data.n -= 1
-  //     v.render(m.data.n)
-  //   })
-  //   v.el.on('click','.mul', () => {
-  //     m.data.n *= 2
-  //     v.render(m.data.n)
-  //   })
-  //   v.el.on('click','.div', () => {
-  //     m.data.n /= 2
-  //     v.render(m.data.n)
-  //   })
-  // }
+
 }
 
 export default c

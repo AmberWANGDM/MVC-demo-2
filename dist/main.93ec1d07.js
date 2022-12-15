@@ -11380,16 +11380,26 @@ require('./app1.css');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var eventBus = (0, _jquery2.default)(window); // api: on trigger
+
 // ----------------- 数据相关 m -----------------
 var m = {
   // 数据
   data: {
     // 初始化数据
     n: parseInt(localStorage.getItem('res'))
-  }
+  },
+  create: function create() {},
+  delete: function _delete() {},
+  update: function update(data) {
+    Object.assign(m.data, data);
+    eventBus.trigger('m:update'); // 触发事件
+  },
+  get: function get() {}
+};
 
-  // ----------------- 视图相关 v -----------------
-};var v = {
+// ----------------- 视图相关 v -----------------
+var v = {
   // 容器
   el: null,
   // html字符串
@@ -11416,6 +11426,10 @@ var c = {
     v.init(container);
     v.render(m.data.n);
     c.autoBindEvents();
+    eventBus.on('m:update', function () {
+      // 监听事件
+      v.render(m.data.n);
+    });
   },
 
   events: {
@@ -11425,23 +11439,17 @@ var c = {
     'click .div': 'div'
   },
   add: function add() {
-    m.data.n += 1;
-    v.render(m.data.n);
+    m.update({ n: m.data.n + 1 });
   },
   sub: function sub() {
-    m.data.n -= 1;
-    v.render(m.data.n);
+    m.update({ n: m.data.n - 1 });
   },
   mul: function mul() {
-    m.data.n *= 2;
-    v.render(m.data.n);
+    m.update({ n: m.data.n * 2 });
   },
   div: function div() {
-    m.data.n /= 2;
-    v.render(m.data.n);
+    m.update({ n: m.data.n / 2 });
   },
-
-  //
   autoBindEvents: function autoBindEvents() {
     for (var key in c.events) {
       var event = key.split(' ')[0];
