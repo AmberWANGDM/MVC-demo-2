@@ -11415,28 +11415,39 @@ var c = {
   init: function init(container) {
     v.init(container);
     v.render(m.data.n);
-    c.bindEvents();
+    c.autoBindEvents();
   },
 
-  // 绑定事件
-  bindEvents: function bindEvents() {
-    // 绑定鼠标事件, 如果绑定在按钮上,更新页面后事件会失效,需要绑在container上
-    v.el.on('click', '.add', function () {
-      m.data.n += 1;
-      v.render(m.data.n);
-    });
-    v.el.on('click', '.sub', function () {
-      m.data.n -= 1;
-      v.render(m.data.n);
-    });
-    v.el.on('click', '.mul', function () {
-      m.data.n *= 2;
-      v.render(m.data.n);
-    });
-    v.el.on('click', '.div', function () {
-      m.data.n /= 2;
-      v.render(m.data.n);
-    });
+  events: {
+    'click .add': 'add',
+    'click .sub': 'sub',
+    'click .mul': 'mul',
+    'click .div': 'div'
+  },
+  add: function add() {
+    m.data.n += 1;
+    v.render(m.data.n);
+  },
+  sub: function sub() {
+    m.data.n -= 1;
+    v.render(m.data.n);
+  },
+  mul: function mul() {
+    m.data.n *= 2;
+    v.render(m.data.n);
+  },
+  div: function div() {
+    m.data.n /= 2;
+    v.render(m.data.n);
+  },
+
+  //
+  autoBindEvents: function autoBindEvents() {
+    for (var key in c.events) {
+      var event = key.split(' ')[0];
+      var element = key.split(' ')[1];
+      v.el.on(event, element, c[c.events[key]]);
+    }
   }
 };
 
