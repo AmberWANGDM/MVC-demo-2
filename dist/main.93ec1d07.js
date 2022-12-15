@@ -11382,6 +11382,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // ----------------- 数据相关 m -----------------
 var m = {
+  // 数据
   data: {
     // 初始化数据
     n: parseInt(localStorage.getItem('res'))
@@ -11389,30 +11390,28 @@ var m = {
 
   // ----------------- 视图相关 v -----------------
 };var v = {
+  // 容器
   el: null,
-  // 注意这里要用div包裹
+  // html字符串
   html: '\n    <div>  \n        <div class="result">\u8BA1\u7B97\u7ED3\u679C: <span id="resultNum">{{n}}</span></div>\n        <button class="btn add">\u52A01</button>\n        <button class="btn sub">\u51CF1</button>\n        <button class="btn mul">\u4E582</button>\n        <button class="btn div">\u96642</button>\n    </div>\n  ',
   // 初始化页面 & 保存container
   init: function init(container) {
-    v.container = (0, _jquery2.default)(container);
+    v.el = (0, _jquery2.default)(container);
     v.render();
   },
 
   // 渲染 & 更新页面
   render: function render() {
-    if (v.el === null) {
-      // 初次渲染页面
-      v.el = (0, _jquery2.default)(v.html.replace('{{n}}', m.data.n.toString())).appendTo(v.container);
-    } else {
-      // 更新页面
-      var newEl = (0, _jquery2.default)(v.html.replace('{{n}}', m.data.n.toString()));
-      v.el.replaceWith(newEl); // 新对象移到当前位置, 但el指向被替代的那个对象, 需要重新赋值
-      v.el = newEl;
+    if (v.el.children.length !== 0) {
+      // 清空当前html,重新渲染
+      v.el.empty();
     }
+    (0, _jquery2.default)(v.html.replace('{{n}}', m.data.n.toString())).appendTo(v.el);
   }
 };
 // ----------------- 其它 c -----------------
 var c = {
+  // 初始化, 形参为容器
   init: function init(container) {
     v.init(container);
     c.ui = {
@@ -11425,21 +11424,23 @@ var c = {
     };
     c.bindEvents();
   },
+
+  // 绑定事件
   bindEvents: function bindEvents() {
     // 绑定鼠标事件, 如果绑定在按钮上,更新页面后事件会失效,需要绑在container上
-    v.container.on('click', '.add', function () {
+    v.el.on('click', '.add', function () {
       m.data.n += 1;
       v.render();
     });
-    v.container.on('click', '.sub', function () {
+    v.el.on('click', '.sub', function () {
       m.data.n -= 1;
       v.render();
     });
-    v.container.on('click', '.mul', function () {
+    v.el.on('click', '.mul', function () {
       m.data.n *= 2;
       v.render();
     });
-    v.container.on('click', '.div', function () {
+    v.el.on('click', '.div', function () {
       m.data.n /= 2;
       v.render();
     });

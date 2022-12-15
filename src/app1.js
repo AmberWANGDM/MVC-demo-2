@@ -3,6 +3,7 @@ import './app1.css'
 
 // ----------------- 数据相关 m -----------------
 const m = {
+  // 数据
   data:{
     // 初始化数据
      n : parseInt(localStorage.getItem('res'))
@@ -11,8 +12,9 @@ const m = {
 
 // ----------------- 视图相关 v -----------------
 const v ={
+  // 容器
   el:null,
-  // 注意这里要用div包裹
+  // html字符串
   html:`
     <div>  
         <div class="result">计算结果: <span id="resultNum">{{n}}</span></div>
@@ -24,24 +26,21 @@ const v ={
   `,
   // 初始化页面 & 保存container
   init(container){
-    v.container = $(container)
+    v.el = $(container)
     v.render()
   },
   // 渲染 & 更新页面
   render(){
-    if(v.el===null){
-      // 初次渲染页面
-      v.el=$(v.html.replace('{{n}}',m.data.n.toString())).appendTo(v.container)
-    }else {
-      // 更新页面
-      const newEl = $(v.html.replace('{{n}}',m.data.n.toString()))
-      v.el.replaceWith(newEl) // 新对象移到当前位置, 但el指向被替代的那个对象, 需要重新赋值
-      v.el = newEl
+    if(v.el.children.length !== 0){
+      // 清空当前html,重新渲染
+      v.el.empty()
     }
+    $(v.html.replace('{{n}}',m.data.n.toString())).appendTo(v.el)
   }
 }
 // ----------------- 其它 c -----------------
 const c = {
+  // 初始化, 形参为容器
   init(container){
     v.init(container)
     c.ui={
@@ -54,21 +53,22 @@ const c = {
     }
     c.bindEvents()
   },
+  // 绑定事件
   bindEvents(){
     // 绑定鼠标事件, 如果绑定在按钮上,更新页面后事件会失效,需要绑在container上
-    v.container.on('click','.add', () => {
+    v.el.on('click','.add', () => {
       m.data.n += 1
       v.render()
     })
-    v.container.on('click','.sub', () => {
+    v.el.on('click','.sub', () => {
       m.data.n -= 1
       v.render()
     })
-    v.container.on('click','.mul', () => {
+    v.el.on('click','.mul', () => {
       m.data.n *= 2
       v.render()
     })
-    v.container.on('click','.div', () => {
+    v.el.on('click','.div', () => {
       m.data.n /= 2
       v.render()
     })
