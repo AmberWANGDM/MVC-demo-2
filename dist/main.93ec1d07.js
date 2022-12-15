@@ -11394,6 +11394,7 @@ var m = {
   update: function update(data) {
     Object.assign(m.data, data);
     eventBus.trigger('m:update'); // 触发事件
+    localStorage.setItem('res', m.data.n);
   },
   get: function get() {}
 };
@@ -11468,6 +11469,10 @@ module.hot.accept(reloadCSS);
 },{"_css_loader":"../../../../../../.config/yarn/global/node_modules/parcel/src/builtins/css-loader.js"}],"app2.js":[function(require,module,exports) {
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 require('./app2.css');
 
 var _jquery = require('jquery');
@@ -11476,25 +11481,77 @@ var _jquery2 = _interopRequireDefault(_jquery);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var html = '\n <section class="app app2">\n      <ol class="tab-bar">\n        <li class="tab1 ">tab1</li>\n        <li class="tab2">tab2</li>\n      </ol>\n      <ol class="tab-content">\n        <li class="active">content1</li>\n        <li>content2</li>\n      </ol>\n    </section>\n';
-var $element = (0, _jquery2.default)(html).appendTo((0, _jquery2.default)('body>.container'));
+var eventBus = (0, _jquery2.default)(window); // api: on trigger
+var localKey = 'app2-index';
+var m = {
+    data: {
+        index: parseInt(localStorage.getItem(localKey)) || 0
+    },
+    create: function create() {},
+    delete: function _delete() {},
+    update: function update(data) {
+        Object.assign(m.data, data);
+        eventBus.trigger('m:update'); // 触发事件
+        localStorage.setItem(localKey, m.data.index);
+    },
+    get: function get() {}
+};
+
+var v = {
+    // 容器
+    el: null,
+    // html字符串
+    html: function html(index) {
+        return '\n        <div>\n          <ol class="tab-bar">\n            <li class="' + (index === 0 ? 'active' : '') + '" data-index="0">tab1</li>\n            <li class="' + (index === 1 ? 'active' : '') + '" data-index="1">tab2</li>\n          </ol>\n          <ol class="tab-content">\n            <li class="' + (index === 0 ? 'active' : '') + '">content1</li>\n            <li class="' + (index === 1 ? 'active' : '') + '">content2</li>\n          </ol>\n        </div>\n        ';
+    },
+    // 初始化页面 & 保存container
+    init: function init(container) {
+        v.el = (0, _jquery2.default)(container);
+        v.render();
+    },
+
+    // 渲染 & 更新页面
+    render: function render() {
+        if (v.el.children.length !== 0) {
+            // 清空当前html,重新渲染
+            v.el.empty();
+        }
+        (0, _jquery2.default)(v.html(m.data.index)).appendTo(v.el);
+    }
+};
 
 var $tabBar = (0, _jquery2.default)('.tab-bar');
 var $tabContent = (0, _jquery2.default)('.tab-content');
-var localKey = 'app2-index';
-var index = localStorage.getItem(localKey) || 0;
 
-$tabBar.on('click', 'li', function (e) {
-  var $tab = (0, _jquery2.default)(e.target);
-  // tab栏切换
-  $tab.addClass('active').siblings().removeClass('active');
-  var index = $tab.index();
-  localStorage.setItem(localKey, index);
-  // 内容切换
-  $tabContent.children().eq(index).addClass('active').siblings().removeClass('active');
-});
+var c2 = {
+    // 初始化, 形参为容器
+    init: function init(container) {
+        v.init(container);
+        v.render(m.data.index);
+        c2.autoBindEvents();
+        eventBus.on('m:update', function () {
+            // 监听事件
+            v.render(m.data.index);
+        });
+    },
 
-$tabBar.children().eq(index).trigger('click'); // 注意这句话
+    events: {
+        'click .tab-bar>li': 'x'
+    },
+    x: function x(e) {
+        var index = parseInt(e.currentTarget.dataset.index);
+        m.update({ index: index });
+    },
+    autoBindEvents: function autoBindEvents() {
+        for (var key in c2.events) {
+            var event = key.split(' ')[0];
+            var element = key.split(' ')[1];
+            v.el.on(event, element, c2[c2.events[key]]);
+        }
+    }
+};
+
+exports.default = c2;
 },{"./app2.css":"app2.css","jquery":"../node_modules/jquery/dist/jquery.js"}],"app3.css":[function(require,module,exports) {
 
 var reloadCSS = require('_css_loader');
@@ -11565,7 +11622,9 @@ var _app = require('./app1');
 
 var _app2 = _interopRequireDefault(_app);
 
-require('./app2');
+var _app3 = require('./app2');
+
+var _app4 = _interopRequireDefault(_app3);
 
 require('./app3');
 
@@ -11574,6 +11633,7 @@ require('./app4');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _app2.default.init('.container>.app1');
+_app4.default.init('.container>.app2');
 },{"./reset.css":"reset.css","./global.css":"global.css","./app1":"app1.js","./app2":"app2.js","./app3":"app3.js","./app4":"app4.js"}],"../../../../../.config/yarn/global/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';

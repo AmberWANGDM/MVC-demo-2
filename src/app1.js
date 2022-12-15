@@ -14,6 +14,7 @@ const m = {
   update(data){
     Object.assign(m.data,data)
     eventBus.trigger('m:update') // 触发事件
+    localStorage.setItem('res',m.data.n)
   },
   get(){}
 }
