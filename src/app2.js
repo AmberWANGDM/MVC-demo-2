@@ -1,31 +1,26 @@
 import './app2.css'
 import $ from 'jquery'
+import View from "./base/View";
+import Model from "./base/Model";
 
-const eventBus = $(window) // api: on trigger
 const localKey = 'app2-index'
-const m = {
+const m = new Model({
     data: {
         index: parseInt(localStorage.getItem(localKey)) || 0
     },
-    create() {
-    },
-    delete() {
-    },
     update(data) {
         Object.assign(m.data, data)
-        eventBus.trigger('m:update') // 触发事件
+        m.trigger('m:update') // 触发事件
         localStorage.setItem(localKey, m.data.index)
-    },
-    get() {
     }
-}
+})
 
-const v = {
-    // 容器
-    el: null,
-    // html字符串
-    html: (index) => {
-        return `
+
+const init = (el) => {
+    new View({
+        el: el,
+        html: (index) => {
+            return `
         <div>
           <ol class="tab-bar">
             <li class="${index === 0 ? 'active' : ''}" data-index="0">tab1</li>
@@ -37,51 +32,25 @@ const v = {
           </ol>
         </div>
         `
-    },
-    // 初始化页面 & 保存container
-    init(container) {
-        v.el = $(container)
-        v.render()
-    },
-    // 渲染 & 更新页面
-    render() {
-        if (v.el.children.length !== 0) {
-            // 清空当前html,重新渲染
-            v.el.empty()
-        }
-        $(v.html(m.data.index)).appendTo(v.el)
-    }
+        },
+        data: m.data,
+        render(data) {
+            const index = data.index
+            if (this.el.children.length !== 0) {
+                // 清空当前html,重新渲染
+                this.el.empty()
+            }
+            $(this.html(index)).appendTo(this.el)
+        },
+        events: {
+            'click .tab-bar>li': 'x',
+        },
+        x(e) {
+            const index = parseInt(e.currentTarget.dataset.index)
+            m.update({index: index})
+        },
+    })
 }
 
 
-const $tabBar = $('.tab-bar')
-const $tabContent = $('.tab-content')
-
-const c2 = {
-    // 初始化, 形参为容器
-    init(container) {
-        v.init(container)
-        v.render(m.data.index)
-        c2.autoBindEvents()
-        eventBus.on('m:update', () => { // 监听事件
-            v.render(m.data.index)
-        })
-    },
-    events: {
-        'click .tab-bar>li': 'x',
-    },
-    x(e) {
-        const index = parseInt(e.currentTarget.dataset.index)
-        m.update({index: index})
-    },
-    autoBindEvents() {
-        for (let key in c2.events) {
-            const event = key.split(' ')[0]
-            const element = key.split(' ')[1]
-            v.el.on(event, element, c2[c2.events[key]])
-        }
-    },
-}
-
-
-export default c2
+export default init
