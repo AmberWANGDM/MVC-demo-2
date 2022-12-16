@@ -11424,6 +11424,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
@@ -11432,18 +11434,37 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var View = function View(_ref) {
-    var el = _ref.el,
-        html = _ref.html,
-        render = _ref.render;
+var View = function () {
+    // constructor({el, html, render, data, eventBus, events}) { // 解构
+    function View(options) {
+        var _this = this;
 
-    _classCallCheck(this, View);
+        _classCallCheck(this, View);
 
-    // 解构
-    this.el = (0, _jquery2.default)(el);
-    this.html = html;
-    this.render = render;
-};
+        Object.assign(this, options);
+        this.el = (0, _jquery2.default)(this.el); // jQuery对象覆盖原生DOM
+        // 渲染
+        this.render(this.data);
+        this.autoBindEvents();
+        this.eventBus.on('m:update', function () {
+            //  监听事件
+            _this.render(_this.data);
+        });
+    }
+
+    _createClass(View, [{
+        key: 'autoBindEvents',
+        value: function autoBindEvents() {
+            for (var key in this.events) {
+                var event = key.split(' ')[0];
+                var element = key.split(' ')[1];
+                this.el.on(event, element, this[this.events[key]]);
+            }
+        }
+    }]);
+
+    return View;
+}();
 
 exports.default = View;
 },{"jquery":"../node_modules/jquery/dist/jquery.js"}],"app1.js":[function(require,module,exports) {
@@ -11475,7 +11496,7 @@ var eventBus = (0, _jquery2.default)(window); // api: on trigger
 var m = new _Model2.default({
     data: {
         // 初始化数据
-        n: parseInt(localStorage.getItem('res'))
+        n: parseFloat(localStorage.getItem('res'))
     },
     update: function update(data) {
         Object.assign(m.data, data);
@@ -11483,65 +11504,47 @@ var m = new _Model2.default({
         localStorage.setItem('res', m.data.n);
     }
 });
-// ----------------- 视图相关 v -----------------
 
 // ----------------- 其它 c -----------------
-var c = {
-    v: null,
-    initV: function initV() {
-        c.v = new _View2.default({
-            el: c.container,
-            html: '\n            <div>  \n                <div class="result">\u8BA1\u7B97\u7ED3\u679C: <span id="resultNum">{{n}}</span></div>\n                <button class="btn add">\u52A01</button>\n                <button class="btn sub">\u51CF1</button>\n                <button class="btn mul">\u4E582</button>\n                <button class="btn div">\u96642</button>\n            </div>\n          ',
-            render: function render(data) {
-                if (c.v.el.children.length !== 0) {
-                    // 清空当前html,重新渲染
-                    c.v.el.empty();
-                }
-                (0, _jquery2.default)(c.v.html.replace('{{n}}', data)).appendTo(c.v.el);
+
+
+var init = function init(el) {
+    new _View2.default({
+        // 初始化, 形参为容器
+        el: el,
+        data: m.data,
+        html: '\n            <div>  \n                <div class="result">\u8BA1\u7B97\u7ED3\u679C: <span id="resultNum">{{n}}</span></div>\n                <button class="btn add">\u52A01</button>\n                <button class="btn sub">\u51CF1</button>\n                <button class="btn mul">\u4E582</button>\n                <button class="btn div">\u96642</button>\n            </div>\n         ',
+        eventBus: eventBus,
+        render: function render(data) {
+            var n = data.n;
+            if (this.el.children.length !== 0) {
+                // 清空当前html,重新渲染
+                this.el.empty();
             }
-        });
-    },
+            (0, _jquery2.default)(this.html.replace('{{n}}', n)).appendTo(this.el);
+        },
 
-    // 初始化, 形参为容器
-    init: function init(container) {
-        c.container = container;
-        c.initV();
-        c.v.render(m.data.n);
-        c.autoBindEvents();
-        eventBus.on('m:update', function () {
-            //  监听事件
-            c.v.render(m.data.n);
-        });
-    },
-
-    events: {
-        'click .add': 'add',
-        'click .sub': 'sub',
-        'click .mul': 'mul',
-        'click .div': 'div'
-    },
-    add: function add() {
-        m.update({ n: m.data.n + 1 });
-    },
-    sub: function sub() {
-        m.update({ n: m.data.n - 1 });
-    },
-    mul: function mul() {
-        m.update({ n: m.data.n * 2 });
-    },
-    div: function div() {
-        m.update({ n: m.data.n / 2 });
-    },
-    autoBindEvents: function autoBindEvents() {
-        for (var key in c.events) {
-            var event = key.split(' ')[0];
-            var element = key.split(' ')[1];
-            c.v.el.on(event, element, c[c.events[key]]);
+        events: {
+            'click .add': 'add',
+            'click .sub': 'sub',
+            'click .mul': 'mul',
+            'click .div': 'div'
+        },
+        add: function add() {
+            m.update({ n: m.data.n + 1 });
+        },
+        sub: function sub() {
+            m.update({ n: m.data.n - 1 });
+        },
+        mul: function mul() {
+            m.update({ n: m.data.n * 2 });
+        },
+        div: function div() {
+            m.update({ n: m.data.n / 2 });
         }
-    }
+    });
 };
-
-exports.default = c;
+exports.default = init;
 },{"jquery":"../node_modules/jquery/dist/jquery.js","./app1.css":"app1.css","./base/Model":"base/Model.js","./base/View":"base/View.js"}],"app2.css":[function(require,module,exports) {
 
 var reloadCSS = require('_css_loader');
@@ -11713,8 +11716,8 @@ require('./app4');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_app2.default.init('.container>.app1');
-_app4.default.init('.container>.app2');
+(0, _app2.default)('.container>.app1');
+// c2.init('.container>.app2')
 },{"./reset.css":"reset.css","./global.css":"global.css","./app1":"app1.js","./app2":"app2.js","./app3":"app3.js","./app4":"app4.js"}],"../../../../../../.config/yarn/global/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
