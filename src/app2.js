@@ -81,7 +81,6 @@ const c2 = {
             v.el.on(event, element, c2[c2.events[key]])
         }
     },
-
 }
 
 

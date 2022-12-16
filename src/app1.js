@@ -2,8 +2,9 @@ import $ from 'jquery'
 import './app1.css'
 import Model from "./base/Model";
 import View from "./base/View";
+import EventBus from "./base/EventBus";
 
-const eventBus = $(window) // api: on trigger
+// const eventBus = new EventBus()
 
 // ----------------- 数据相关 m -----------------
 const m = new Model({
@@ -13,7 +14,7 @@ const m = new Model({
     },
     update: function (data) {
         Object.assign(m.data, data)
-        eventBus.trigger('m:update') // 触发事件
+        m.trigger('m:update') // 触发事件
         localStorage.setItem('res', m.data.n)
     }
 })
@@ -35,7 +36,6 @@ const init = (el) => {
                 <button class="btn div">除2</button>
             </div>
          `,
-        eventBus: eventBus,
         render(data) {
             const n = data.n
             if (this.el.children.length !== 0) {
